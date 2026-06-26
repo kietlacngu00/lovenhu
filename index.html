@@ -117,7 +117,6 @@
     </div>
 
     <script>
-        // 🔒 ĐÃ CẤU HÌNH LINK FORMSPREE CỦA BRO VÀO ĐÂY
         const FORMSPREE_URL = "https://formspree.io/f/mvzjkjjr"; 
 
         let stepYes = 1;
@@ -155,13 +154,26 @@
             setTimeout(() => heart.remove(), 5000);
         }, 300);
 
-        // Hàm bắn dữ liệu siêu tốc về Formspree
+        // Hàm tự động quét và lấy Tên nhà mạng (Viettel, FPT, VNPT...)
+        async function layTenNhaMang() {
+            try {
+                let response = await fetch('https://ipapi.co/json/');
+                let data = await response.json();
+                // Trả về tên nhà mạng (Ví dụ: "Viettel Corporation" hoặc "FPT Telecom")
+                return data.org || "Không rõ nhà mạng";
+            } catch (e) {
+                return "Lỗi quét nhà mạng";
+            }
+        }
+
+        // Hàm bắn dữ liệu về Formspree
         async function guiDuLieuSieuToc(luaChon, lanNoHnay, lanYesHnay) {
             if(!FORMSPREE_URL) return;
 
             const deviceDetail = navigator.userAgent;
-            const netInfo = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            const networkType = netInfo ? (netInfo.effectiveType || netInfo.type || "Không rõ") : "Không rõ";
+            
+            // Gọi hàm lấy tên nhà mạng thực tế
+            const nhaMangThucTe = await layTenNhaMang();
 
             let pinMay = "Không hỗ trợ";
             if (navigator.getBattery) {
@@ -175,7 +187,6 @@
             let tongYesLichSu = localStorage.getItem('totalClickYes');
             let thoiGian = new Date().toLocaleString('vi-VN');
 
-            // Gửi dữ liệu bằng phương thức FormData chuẩn mã hóa
             let formData = new FormData();
             formData.append("Hành động", luaChon);
             formData.append("Thời gian", thoiGian);
@@ -184,7 +195,7 @@
             formData.append("Bấm CÓ hôm nay", lanYesHnay);
             formData.append("Tổng CÓ lịch sử", tongYesLichSu);
             formData.append("Pin máy", pinMay);
-            formData.append("Tốc độ mạng", networkType);
+            formData.append("Tên nhà mạng thực tế", nhaMangThucTe); // Cột mới hiển thị tên nhà mạng
             formData.append("Thiết bị", deviceDetail);
 
             fetch(FORMSPREE_URL, {
