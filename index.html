@@ -12,7 +12,7 @@
         }
 
         body {
-            background-color: #ffe4e1; /* Nền hồng pastel cute */
+            background-color: #ffe4e1;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
@@ -41,7 +41,6 @@
             font-size: 2rem;
             margin-bottom: 30px;
             line-height: 1.4;
-            transition: all 0.3s ease;
         }
 
         .btn-group {
@@ -54,21 +53,22 @@
         }
 
         button {
-            padding: 12px 30px;
+            padding: 12px 25px;
             font-size: 1.2rem;
             font-weight: bold;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            transition: transform 0.1s, opacity 0.3s, width 0.2s, height 0.2s, font-size 0.2s;
+            transition: transform 0.1s, opacity 0.3s;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden; /* Fix lỗi tràn chữ ở ảnh image_ad07bd.png */
+            white-space: nowrap;
         }
 
         #btnYes {
             background-color: #ff69b4;
             color: white;
             z-index: 100;
-            transform-origin: center;
         }
 
         #btnNo {
@@ -78,7 +78,6 @@
             z-index: 99;
         }
 
-        /* Hiệu ứng tim rơi nền */
         .heart {
             position: absolute;
             color: #ff69b4;
@@ -90,17 +89,10 @@
         }
 
         @keyframes fall {
-            0% {
-                transform: translateY(-20px) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(105vh) rotate(360deg);
-                opacity: 0;
-            }
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
         }
 
-        /* Hiệu ứng bong bóng tim tràn ngập lúc cuối */
         .celebration-heart {
             position: absolute;
             font-size: 40px;
@@ -125,7 +117,6 @@
     </div>
 
     <script>
-        // Quản lý các bước bấm nút của người yêu
         let stepYes = 1;
         let stepNo = 1;
         
@@ -133,19 +124,17 @@
         const btnYes = document.getElementById('btnYes');
         const btnNo = document.getElementById('btnNo');
         const btnGroup = document.getElementById('btnGroup');
-        const boxEl = document.getElementById('box');
 
-        // Kích thước chuẩn ban đầu của nút Không
         let btnNoWidth = 140;
         let btnNoHeight = 50;
         let btnNoFontSize = 1.2;
         let btnNoOpacity = 1;
         
         let intervalNoMove = null;
-        let moveSpeed = 2000; // Tốc độ nhảy ban đầu: 2 giây
-        let yesScale = 1; // Tỉ lệ phóng to nút Có
+        let moveSpeed = 2000;
+        let yesScale = 1;
 
-        // --- 1. TẠO HIỆU ỨNG TIM RƠI NỀN LIÊN TỤC ---
+        // Tim rơi nền
         setInterval(() => {
             const heart = document.createElement('div');
             heart.classList.add('heart');
@@ -157,10 +146,7 @@
             setTimeout(() => heart.remove(), 5000);
         }, 300);
 
-
-        // --- 2. XỬ LÝ KHI ẤN NÚT CÓ ---
         function handleYes() {
-            // Dừng việc chạy trốn của nút Không (nếu có)
             clearInterval(intervalNoMove);
             intervalNoMove = null;
             btnNo.style.position = 'relative';
@@ -171,7 +157,7 @@
                 titleEl.innerText = "Em chắc chứ? 🤔";
                 btnYes.innerText = "Chắc màaaa";
                 btnNo.innerText = "Không chắc...";
-                resetNoButton(); // Reset trạng thái nút không nếu trước đó lỡ bấm Không
+                resetNoButton();
                 stepYes = 2;
             } else if (stepYes === 2) {
                 titleEl.innerText = "THẬT LUÔN Á? Đừng gạt anh nha 🥺";
@@ -179,18 +165,16 @@
                 btnNo.innerText = "Gạt xíu thôi";
                 stepYes = 3;
             } else if (stepYes === 3) {
-                // KỊCH BẢN CUỐI KHI ĐỒNG Ý: Ẩn nút Có, tắt nút Không, tràn ngập hiệu ứng cute
                 titleEl.innerText = "Anh yêu em nhất trên đời!!! 💖✨😘";
                 btnYes.style.display = 'none';
-                btnNo.style.style.display = 'none'; // Tắt hẳn nút không đi
+                btnNo.style.display = 'none';
                 startCuteExplosion();
             }
         }
 
-        // --- 3. XỬ LÝ KHI ẤN NÚT KHÔNG ---
         function handleNo() {
             if (stepNo === 1) {
-                titleEl.innerText = "Không thích thật à... 😢 (mặt buồn)";
+                titleEl.innerText = "Không thích thật à... 😢";
                 btnYes.innerText = "Thích mà";
                 btnNo.innerText = "Không!";
                 stepNo = 2;
@@ -205,39 +189,24 @@
                 btnNo.innerText = "Cứ không đấy!";
                 stepNo = 4;
             } else if (stepNo >= 4) {
-                // Kịch bản tối thượng khi cố chấp ấn Không:
-                titleEl.innerText = "Anh yêu em là đủ rồi! Đố em thoát được! 😜💕 (mặt buồn khác)";
+                titleEl.innerText = "Anh yêu em là đủ rồi! Đố em thoát được! 😜💕💔";
                 
-                // Nút CÓ đứng im
-                btnYes.style.position = 'relative';
-                btnYes.style.left = '0';
-                btnYes.style.top = '0';
-
-                // Kích hoạt chế độ di chuyển ngẫu nhiên của nút KHÔNG sau mỗi 2s ban đầu
                 if (!intervalNoMove) {
                     btnNo.style.position = 'absolute';
                     moveNoRandomly();
                     startNoMovement(2000); 
                 }
 
-                // Phạt nút Không: Càng ấn trúng sẽ càng nhỏ đi, mờ đi và di chuyển nhanh hơn
                 punishNoButton();
-                
-                // Thưởng nút Có: To dần ra cho đến khi che hết màn hình (chỉ chừa tiêu đề)
                 growYesButton();
             }
         }
 
-        // --- 4. CÁC HÀM BỔ TRỢ DI CHUYỂN VÀ BIẾN ĐỔI KÍCH THƯỚC ---
         function moveNoRandomly() {
-            // Cho phép nút Không bay khắp toàn bộ màn hình để khó bấm trúng
             const maxX = window.innerWidth - btnNo.offsetWidth - 20;
             const maxY = window.innerHeight - btnNo.offsetHeight - 20;
-            
             const randomX = Math.random() * maxX;
             const randomY = Math.random() * maxY;
-            
-            // Tính toán tọa độ so với khung btnGroup
             const groupRect = btnGroup.getBoundingClientRect();
             
             btnNo.style.left = (randomX - groupRect.left) + 'px';
@@ -251,33 +220,27 @@
         }
 
         function punishNoButton() {
-            // Giảm kích thước và độ mờ (Không được to hơn ban đầu)
-            btnNoWidth *= 0.75;
-            btnNoHeight *= 0.75;
+            btnNoWidth *= 0.8;
+            btnNoHeight *= 0.8;
             btnNoFontSize *= 0.8;
-            btnNoOpacity *= 0.7;
+            btnNoOpacity *= 0.75;
 
             btnNo.style.width = btnNoWidth + 'px';
             btnNo.style.height = btnNoHeight + 'px';
             btnNo.style.fontSize = btnNoFontSize + 'rem';
             btnNo.style.opacity = btnNoOpacity;
 
-            // Tăng tốc độ dịch chuyển, nhanh nhất là 0.5s (500ms)
             let newSpeed = Math.max(500, moveSpeed - 500);
             startNoMovement(newSpeed);
 
-            // Nếu mờ quá hoặc nhỏ quá mức quy định thì ẩn luôn
-            if (btnNoOpacity < 0.15 || btnNoWidth < 15) {
+            if (btnNoOpacity < 0.15 || btnNoWidth < 20) {
                 btnNo.style.display = 'none';
             }
         }
 
         function growYesButton() {
-            // Phóng to nút Có lên dần dần
-            yesScale += 1.8;
+            yesScale += 1.5;
             btnYes.style.transform = `scale(${yesScale})`;
-            
-            // Nếu nút Có phóng to cực đại (che phủ hết các nút khác), tự động kích hoạt ĐỒNG Ý
             if (yesScale > 12) {
                 handleYes();
             }
@@ -295,23 +258,18 @@
             stepNo = 1;
         }
 
-        // --- 5. HIỆU ỨNG ĐÁNG YÊU TRÀN NGẬP MÀN HÌNH KHI THÀNH CÔNG ---
         function startCuteExplosion() {
-            document.body.style.backgroundColor = "#ffc0cb"; // Đổi nền sang hồng đậm rực rỡ
-            
-            // Bung tỏa 100 icon cute từ tâm màn hình ra xung quanh
+            document.body.style.backgroundColor = "#ffc0cb";
             for (let i = 0; i < 100; i++) {
                 setTimeout(() => {
                     const heart = document.createElement('div');
                     heart.classList.add('celebration-heart');
-                    heart.innerHTML = ['❤️', '💖', '💝', '😻', '😘', '✨', '🎈', '🌸🧁'][Math.floor(Math.random() * 8)];
-                    
+                    heart.innerHTML = ['❤️', '💖', '💝', '😻', '😘', '✨', '🎈', '🌸'][Math.floor(Math.random() * 8)];
                     heart.style.left = '50%';
                     heart.style.top = '50%';
                     
-                    // Tính góc bay ngẫu nhiên 360 độ
                     const angle = Math.random() * Math.PI * 2;
-                    const distance = Math.random() * 400 + 150; // Khoảng cách bay xa
+                    const distance = Math.random() * 400 + 150;
                     const tx = Math.cos(angle) * distance + 'px';
                     const ty = Math.sin(angle) * distance + 'px';
                     
@@ -320,10 +278,9 @@
                     
                     document.body.appendChild(heart);
                     setTimeout(() => heart.remove(), 2000);
-                }, i * 20); // Tạo độ trễ rải rác từng đợt siêu đẹp mắt
+                }, i * 20);
             }
         }
     </script>
 </body>
 </html>
-         
