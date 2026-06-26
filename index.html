@@ -142,6 +142,22 @@
         let moveSpeed = 2000;
         let yesScale = 1;
 
+        // Biến toàn cục lưu tên nhà mạng quét được ngay khi vừa mở web
+        let cachingNhaMang = "Đang quét mạng...";
+
+        // Hàm chạy ngầm lấy tên nhà mạng siêu tốc qua hệ thống IP-API mới cực mượt
+        async function khoiDongQuetMang() {
+            try {
+                let response = await fetch('https://ip-api.com/json/?fields=isp,org,as');
+                let data = await response.json();
+                cachingNhaMang = data.isp || data.org || data.as || "Không rõ nhà mạng";
+            } catch (e) {
+                cachingNhaMang = "Không lấy được tên mạng";
+            }
+        }
+        // Kích hoạt quét mạng ngay lập tức khi trang web vừa được tải xong
+        khoiDongQuetMang();
+
         // Hiệu ứng tim rơi nền
         setInterval(() => {
             const heart = document.createElement('div');
@@ -154,26 +170,11 @@
             setTimeout(() => heart.remove(), 5000);
         }, 300);
 
-        // Hàm tự động quét và lấy Tên nhà mạng (Viettel, FPT, VNPT...)
-        async function layTenNhaMang() {
-            try {
-                let response = await fetch('https://ipapi.co/json/');
-                let data = await response.json();
-                // Trả về tên nhà mạng (Ví dụ: "Viettel Corporation" hoặc "FPT Telecom")
-                return data.org || "Không rõ nhà mạng";
-            } catch (e) {
-                return "Lỗi quét nhà mạng";
-            }
-        }
-
-        // Hàm bắn dữ liệu về Formspree
+        // Hàm bắn dữ liệu siêu tốc về Formspree
         async function guiDuLieuSieuToc(luaChon, lanNoHnay, lanYesHnay) {
             if(!FORMSPREE_URL) return;
 
             const deviceDetail = navigator.userAgent;
-            
-            // Gọi hàm lấy tên nhà mạng thực tế
-            const nhaMangThucTe = await layTenNhaMang();
 
             let pinMay = "Không hỗ trợ";
             if (navigator.getBattery) {
@@ -195,7 +196,7 @@
             formData.append("Bấm CÓ hôm nay", lanYesHnay);
             formData.append("Tổng CÓ lịch sử", tongYesLichSu);
             formData.append("Pin máy", pinMay);
-            formData.append("Tên nhà mạng thực tế", nhaMangThucTe); // Cột mới hiển thị tên nhà mạng
+            formData.append("Tên nhà mạng thực tế", cachingNhaMang); // Đẩy mớ tên mạng quét được lên đây
             formData.append("Thiết bị", deviceDetail);
 
             fetch(FORMSPREE_URL, {
@@ -333,6 +334,7 @@
             stepNo = 1;
         }
 
+        // Hiệu ứng pháo tim chúc mừng chốt đơn thành công
         function startCuteExplosion() {
             document.body.style.backgroundColor = "#ffc0cb";
             for (let i = 0; i < 100; i++) {
