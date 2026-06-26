@@ -61,7 +61,7 @@
             cursor: pointer;
             transition: transform 0.1s, opacity 0.3s;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            overflow: hidden; /* Fix lỗi tràn chữ ở ảnh image_ad07bd.png */
+            overflow: hidden;
             white-space: nowrap;
         }
 
@@ -134,7 +134,7 @@
         let moveSpeed = 2000;
         let yesScale = 1;
 
-        // Tim rơi nền
+        // Hiệu ứng tim rơi
         setInterval(() => {
             const heart = document.createElement('div');
             heart.classList.add('heart');
@@ -189,7 +189,7 @@
                 btnNo.innerText = "Cứ không đấy!";
                 stepNo = 4;
             } else if (stepNo >= 4) {
-                titleEl.innerText = "Anh yêu em là đủ rồi! Đố em thoát được! 😜💕💔";
+                titleEl.innerText = "Anh yêu em là đủ rồi! Đố em thoát được! 😜💕😭";
                 
                 if (!intervalNoMove) {
                     btnNo.style.position = 'absolute';
