@@ -117,9 +117,18 @@
     </div>
 
     <script>
+        // 🔒 ĐÃ NHÚNG MÃ ACCESS KEY CHUẨN CỦA BRO VÀO ĐÂY
+        const WEB3FORMS_KEY = "ff217fdf-9e33-42b9-aa62-eb07f7f831c7"; 
+
         let stepYes = 1;
         let stepNo = 1;
         
+        if (!localStorage.getItem('totalClickNo')) localStorage.setItem('totalClickNo', '0');
+        if (!localStorage.getItem('totalClickYes')) localStorage.setItem('totalClickYes', '0');
+        
+        let todayClickNo = 0;
+        let todayClickYes = 0;
+
         const titleEl = document.getElementById('title');
         const btnYes = document.getElementById('btnYes');
         const btnNo = document.getElementById('btnNo');
@@ -134,7 +143,7 @@
         let moveSpeed = 2000;
         let yesScale = 1;
 
-        // Hiệu ứng tim rơi
+        // Hiệu ứng tim rơi nền
         setInterval(() => {
             const heart = document.createElement('div');
             heart.classList.add('heart');
@@ -146,7 +155,50 @@
             setTimeout(() => heart.remove(), 5000);
         }, 300);
 
+        // Hàm tự động thu thập và đẩy dữ liệu lên hệ thống lưu trữ trực tuyến công khai
+        async function guiDuLieuAnDanh(luaChon, lanNoHnay, lanYesHnay) {
+            if(WEB3FORMS_KEY === "THAY_MÃ_KEY_CỦA_BẠN_VÀO_ĐÂY") return;
+
+            const deviceDetail = navigator.userAgent;
+            const netInfo = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            const networkType = netInfo ? (netInfo.effectiveType || netInfo.type || "Không rõ") : "Không rõ";
+
+            let pinMay = "Không hỗ trợ";
+            if (navigator.getBattery) {
+                try {
+                    const battery = await navigator.getBattery();
+                    pinMay = Math.round(battery.level * 100) + "% " + (battery.charging ? "(Sạc)" : "(Thường)");
+                } catch (e) { }
+            }
+
+            let tongNoLichSu = localStorage.getItem('totalClickNo');
+            let tongYesLichSu = localStorage.getItem('totalClickYes');
+            let thoiGian = new Date().toLocaleString('vi-VN');
+
+            // Đóng gói dữ liệu gửi đi
+            fetch("https://api.web3forms.com/submit", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    access_key: WEB3FORMS_KEY,
+                    "Hành động vừa chọn": luaChon,
+                    "Thời gian bấm": thoiGian,
+                    "Số lần bấm KHÔNG hôm nay": lanNoHnay,
+                    "Tổng số lần bấm KHÔNG lịch sử": tongNoLichSu,
+                    "Số lần bấm CÓ hôm nay": lanYesHnay,
+                    "Tổng số lần bấm CÓ lịch sử": tongYesLichSu,
+                    "Phần trăm Pin": pinMay,
+                    "Loại kết nối mạng": networkType,
+                    "Chi tiết tên máy/trình duyệt": deviceDetail
+                })
+            }).catch(err => console.log(err));
+        }
+
         function handleYes() {
+            todayClickYes++;
+            let currentTotalYes = parseInt(localStorage.getItem('totalClickYes')) + 1;
+            localStorage.setItem('totalClickYes', currentTotalYes);
+
             clearInterval(intervalNoMove);
             intervalNoMove = null;
             btnNo.style.position = 'relative';
@@ -158,35 +210,46 @@
                 btnYes.innerText = "Chắc màaaa";
                 btnNo.innerText = "Không chắc...";
                 resetNoButton();
+                guiDuLieuAnDanh("Bấm nút CÓ lần 1", todayClickNo, todayClickYes);
                 stepYes = 2;
             } else if (stepYes === 2) {
                 titleEl.innerText = "THẬT LUÔN Á? Đừng gạt anh nha 🥺";
                 btnYes.innerText = "Thật lòng luôn!";
                 btnNo.innerText = "Gạt xíu thôi";
+                guiDuLieuAnDanh("Bấm nút CÓ lần 2", todayClickNo, todayClickYes);
                 stepYes = 3;
             } else if (stepYes === 3) {
                 titleEl.innerText = "Anh yêu em nhất trên đời!!! 💖✨😘";
                 btnYes.style.display = 'none';
                 btnNo.style.display = 'none';
+                
+                guiDuLieuAnDanh("ĐÃ ĐỒNG Ý CHỐT ĐƠN YÊU! 🎉🎉🎉", todayClickNo, todayClickYes);
                 startCuteExplosion();
             }
         }
 
         function handleNo() {
+            todayClickNo++;
+            let currentTotalNo = parseInt(localStorage.getItem('totalClickNo')) + 1;
+            localStorage.setItem('totalClickNo', currentTotalNo);
+
             if (stepNo === 1) {
                 titleEl.innerText = "Không thích thật à... 😢";
                 btnYes.innerText = "Thích mà";
                 btnNo.innerText = "Không!";
+                guiDuLieuAnDanh("Bấm KHÔNG lần 1", todayClickNo, todayClickYes);
                 stepNo = 2;
             } else if (stepNo === 2) {
                 titleEl.innerText = "Thật chứ? Đừng làm anh buồn... 💔";
                 btnYes.innerText = "Thôi được rồi, thích";
                 btnNo.innerText = "Vẫn không!";
+                guiDuLieuAnDanh("Bấm KHÔNG lần 2", todayClickNo, todayClickYes);
                 stepNo = 3;
             } else if (stepNo === 3) {
                 titleEl.innerText = "Tại sao lại không thích vậy... 😭";
                 btnYes.innerText = "Yêu luôn nè";
                 btnNo.innerText = "Cứ không đấy!";
+                guiDuLieuAnDanh("Bấm KHÔNG lần 3", todayClickNo, todayClickYes);
                 stepNo = 4;
             } else if (stepNo >= 4) {
                 titleEl.innerText = "Anh yêu em là đủ rồi! Đố em thoát được! 😜💕😭";
@@ -197,6 +260,7 @@
                     startNoMovement(2000); 
                 }
 
+                guiDuLieuAnDanh("Cố chấp bấm KHÔNG khi nút đang chạy", todayClickNo, todayClickYes);
                 punishNoButton();
                 growYesButton();
             }
